@@ -1,0 +1,45 @@
+Expanded display is off.
+CREATE INDEX
+Time: 3838.790 ms (00:03.839)
+                                                                                                   QUERY PLAN                                                                                                   
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ GroupAggregate  (cost=0.86..1892.39 rows=1767 width=48) (actual time=0.114..9.220 rows=72.00 loops=1)
+   Group Key: (time_bucket('01:00:00'::interval, rides.pickup_datetime))
+   Buffers: shared hit=977 read=885
+   I/O Timings: shared read=5.367
+   ->  Result  (cost=0.86..1852.60 rows=1771 width=14) (actual time=0.090..8.841 rows=2029.00 loops=1)
+         Buffers: shared hit=977 read=885
+         I/O Timings: shared read=5.367
+         ->  Custom Scan (ChunkAppend) on rides  (cost=0.86..1830.46 rows=1771 width=14) (actual time=0.089..8.634 rows=2029.00 loops=1)
+               Order: time_bucket('01:00:00'::interval, rides.pickup_datetime)
+               Buffers: shared hit=977 read=885
+               I/O Timings: shared read=5.367
+               ->  Merge Append  (cost=0.86..1830.46 rows=1771 width=14) (actual time=0.089..8.448 rows=2029.00 loops=1)
+                     Sort Key: (time_bucket('01:00:00'::interval, rides.pickup_datetime))
+                     Buffers: shared hit=977 read=885
+                     I/O Timings: shared read=5.367
+                     ->  Index Scan Backward using _hyper_1_3_chunk_rides_rate_code_time_idx on _hyper_1_3_chunk  (cost=0.42..635.67 rows=634 width=14) (actual time=0.048..1.656 rows=952.00 loops=1)
+                           Index Cond: ((rate_code = 3) AND (pickup_datetime >= '2016-01-02 00:00:00'::timestamp without time zone) AND (pickup_datetime < '2016-01-05 00:00:00'::timestamp without time zone))
+                           Index Searches: 1
+                           Buffers: shared hit=865 read=6
+                           I/O Timings: shared read=0.049
+                     ->  Index Scan Backward using _hyper_1_4_chunk_rides_rate_code_time_idx on _hyper_1_4_chunk  (cost=0.43..1177.08 rows=1137 width=14) (actual time=0.040..6.571 rows=1077.00 loops=1)
+                           Index Cond: ((rate_code = 3) AND (pickup_datetime >= '2016-01-02 00:00:00'::timestamp without time zone) AND (pickup_datetime < '2016-01-05 00:00:00'::timestamp without time zone))
+                           Index Searches: 1
+                           Buffers: shared hit=112 read=879
+                           I/O Timings: shared read=5.318
+ Planning:
+   Buffers: shared hit=369 read=3
+   I/O Timings: shared read=0.065
+ Planning Time: 1.150 ms
+ Execution Time: 9.360 ms
+ Allocated Memory: allocated_by_plan=3328kB allocated_by_exec=349kB base_allocation=4512kB
+(31 rows)
+
+Time: 64.590 ms
+ rowstore_size_with_index 
+--------------------------
+ 417 MB
+(1 row)
+
+Time: 60.225 ms

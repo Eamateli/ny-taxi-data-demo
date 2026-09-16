@@ -1,0 +1,36 @@
+ total_rows 
+------------
+    2333578
+(1 row)
+
+Time: 402.117 ms
+ rate_code | num_trips 
+-----------+-----------
+         1 |   2266401
+         2 |     54832
+         3 |      4126
+         4 |       967
+         5 |      7193
+         6 |        17
+        99 |        42
+(7 rows)
+
+Time: 1130.837 ms (00:01.131)
+ chunks 
+--------
+      4
+(1 row)
+
+Time: 51.714 ms
+ total_size 
+------------
+ 372 MB
+(1 row)
+
+Time: 58.786 ms
+ job_id |     proc_name      | scheduled 
+--------+--------------------+-----------
+   1001 | policy_compression | f
+(1 row)
+
+Time: 53.493 ms
