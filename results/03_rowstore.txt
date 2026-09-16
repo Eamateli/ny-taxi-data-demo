@@ -4,12 +4,120 @@ Expanded display is off.
                  0 |      4
 (1 row)
 
-Time: 58.262 ms
+Time: 58.056 ms
  scheduled 
 -----------
  f
 (1 row)
 
-Time: 53.213 ms
+Time: 52.848 ms
 ANALYZE
-Time: 5079.576 ms (00:05.080)
+Time: 4923.231 ms (00:04.923)
+                                                                                   QUERY PLAN                                                                                   
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=83230.03..83230.53 rows=200 width=72) (actual time=2630.856..2637.454 rows=6.00 loops=1)
+   Sort Key: (lower(rates.description))
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=30892 read=16750
+   I/O Timings: shared read=1.594
+   ->  Finalize GroupAggregate  (cost=83179.44..83222.39 rows=200 width=72) (actual time=2630.842..2637.447 rows=6.00 loops=1)
+         Group Key: rates.description
+         Buffers: shared hit=30892 read=16750
+         I/O Timings: shared read=1.594
+         ->  Gather Merge  (cost=83179.44..83218.19 rows=340 width=40) (actual time=2630.797..2637.397 rows=12.00 loops=1)
+               Workers Planned: 1
+               Workers Launched: 1
+               Buffers: shared hit=30892 read=16750
+               I/O Timings: shared read=1.594
+               ->  Sort  (cost=82179.43..82179.93 rows=200 width=40) (actual time=2625.286..2625.298 rows=6.00 loops=2)
+                     Sort Key: rates.description
+                     Sort Method: quicksort  Memory: 25kB
+                     Buffers: shared hit=30892 read=16750
+                     I/O Timings: shared read=1.594
+                     Worker 0:  Sort Method: quicksort  Memory: 25kB
+                     ->  Partial HashAggregate  (cost=82169.78..82171.78 rows=200 width=40) (actual time=2625.265..2625.279 rows=6.00 loops=2)
+                           Group Key: rates.description
+                           Batches: 1  Memory Usage: 40kB
+                           Buffers: shared hit=30884 read=16750
+                           I/O Timings: shared read=1.594
+                           Worker 0:  Batches: 1  Memory Usage: 40kB
+                           ->  Hash Join  (cost=38.58..75307.00 rows=1372556 width=34) (actual time=0.109..1940.214 rows=1166768.00 loops=2)
+                                 Hash Cond: (rides.rate_code = rates.rate_code)
+                                 Buffers: shared hit=30884 read=16750
+                                 I/O Timings: shared read=1.594
+                                 ->  Parallel Append  (cost=0.00..71653.44 rows=1372556 width=6) (actual time=0.079..1229.748 rows=1166789.00 loops=2)
+                                       Buffers: shared hit=30882 read=16750
+                                       I/O Timings: shared read=1.594
+                                       ->  Parallel Seq Scan on _hyper_1_4_chunk  (cost=0.00..33195.66 rows=698463 width=6) (actual time=0.140..550.027 rows=593753.00 loops=2)
+                                             Filter: (pickup_datetime < '2016-01-08 00:00:00'::timestamp without time zone)
+                                             Buffers: shared hit=7714 read=16750
+                                             I/O Timings: shared read=1.594
+                                       ->  Parallel Seq Scan on _hyper_1_3_chunk  (cost=0.00..21423.96 rows=459471 width=6) (actual time=0.007..188.977 rows=781178.00 loops=1)
+                                             Filter: (pickup_datetime < '2016-01-08 00:00:00'::timestamp without time zone)
+                                             Buffers: shared hit=15680
+                                       ->  Parallel Seq Scan on _hyper_1_6_chunk  (cost=0.00..6807.82 rows=142691 width=6) (actual time=0.006..108.180 rows=242599.00 loops=1)
+                                             Filter: (pickup_datetime < '2016-01-08 00:00:00'::timestamp without time zone)
+                                             Buffers: shared hit=5024
+                                       ->  Parallel Seq Scan on _hyper_1_5_chunk  (cost=0.00..3363.23 rows=71931 width=6) (actual time=0.006..16.565 rows=122295.00 loops=1)
+                                             Filter: (pickup_datetime < '2016-01-08 00:00:00'::timestamp without time zone)
+                                             Buffers: shared hit=2464
+                                 ->  Hash  (cost=22.70..22.70 rows=1270 width=36) (actual time=0.018..0.019 rows=6.00 loops=2)
+                                       Buckets: 2048  Batches: 1  Memory Usage: 17kB
+                                       Buffers: shared hit=2
+                                       ->  Seq Scan on rates  (cost=0.00..22.70 rows=1270 width=36) (actual time=0.012..0.013 rows=6.00 loops=2)
+                                             Buffers: shared hit=2
+ Planning:
+   Buffers: shared hit=259
+ Planning Time: 0.749 ms
+ Execution Time: 2637.531 ms
+ Allocated Memory: allocated_by_plan=2479kB allocated_by_exec=623kB base_allocation=3329kB
+(56 rows)
+
+Time: 2786.780 ms (00:02.787)
+                                                                                                    QUERY PLAN                                                                                                    
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=61692.86..61697.52 rows=1863 width=48) (actual time=435.583..441.741 rows=72.00 loops=1)
+   Sort Key: (time_bucket('01:00:00'::interval, rides.pickup_datetime))
+   Sort Method: quicksort  Memory: 28kB
+   Buffers: shared hit=24027 read=16117
+   I/O Timings: shared read=90.132
+   ->  Finalize HashAggregate  (cost=61563.72..61591.67 rows=1863 width=48) (actual time=435.530..441.719 rows=72.00 loops=1)
+         Group Key: (time_bucket('01:00:00'::interval, rides.pickup_datetime))
+         Batches: 1  Memory Usage: 121kB
+         Buffers: shared hit=24027 read=16117
+         I/O Timings: shared read=90.132
+         ->  Gather  (cost=37694.91..61552.73 rows=1099 width=48) (actual time=244.220..441.551 rows=193.00 loops=1)
+               Workers Planned: 1
+               Workers Launched: 1
+               Buffers: shared hit=24027 read=16117
+               I/O Timings: shared read=90.132
+               ->  Parallel Append  (cost=36694.91..60442.83 rows=1099 width=48) (actual time=336.242..431.622 rows=96.50 loops=2)
+                     Buffers: shared hit=24027 read=16117
+                     I/O Timings: shared read=90.132
+                     ->  Partial HashAggregate  (cost=36694.91..36704.78 rows=658 width=48) (actual time=309.595..309.619 rows=60.50 loops=2)
+                           Group Key: time_bucket('01:00:00'::interval, _hyper_1_4_chunk.pickup_datetime)
+                           Batches: 1  Memory Usage: 73kB
+                           Buffers: shared hit=8347 read=16117
+                           I/O Timings: shared read=90.132
+                           Worker 0:  Batches: 1  Memory Usage: 73kB
+                           ->  Parallel Seq Scan on _hyper_1_4_chunk  (cost=0.00..36689.97 rows=658 width=14) (actual time=16.127..309.357 rows=538.50 loops=2)
+                                 Filter: ((pickup_datetime >= '2016-01-02 00:00:00'::timestamp without time zone) AND (pickup_datetime < '2016-01-05 00:00:00'::timestamp without time zone) AND (rate_code = 3))
+                                 Rows Removed by Filter: 593214
+                                 Buffers: shared hit=8347 read=16117
+                                 I/O Timings: shared read=90.132
+                     ->  Partial HashAggregate  (cost=23725.95..23732.56 rows=441 width=48) (actual time=243.956..243.984 rows=72.00 loops=1)
+                           Group Key: time_bucket('01:00:00'::interval, _hyper_1_3_chunk.pickup_datetime)
+                           Batches: 1  Memory Usage: 72kB
+                           Buffers: shared hit=15680
+                           ->  Parallel Seq Scan on _hyper_1_3_chunk  (cost=0.00..23722.64 rows=441 width=14) (actual time=0.270..243.618 rows=952.00 loops=1)
+                                 Filter: ((pickup_datetime >= '2016-01-02 00:00:00'::timestamp without time zone) AND (pickup_datetime < '2016-01-05 00:00:00'::timestamp without time zone) AND (rate_code = 3))
+                                 Rows Removed by Filter: 780226
+                                 Buffers: shared hit=15680
+ Planning:
+   Buffers: shared hit=82
+ Planning Time: 0.370 ms
+ Execution Time: 441.859 ms
+ Allocated Memory: allocated_by_plan=804kB allocated_by_exec=577kB base_allocation=3329kB
+(42 rows)
+
+Time: 510.545 ms

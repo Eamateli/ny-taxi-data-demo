@@ -1,1 +1,55 @@
-sql/06_cagg.sql: No such file or directory
+Expanded display is off.
+CREATE MATERIALIZED VIEW
+Time: 62.583 ms
+CALL
+Time: 3231.931 ms (00:03.232)
+CREATE VIEW
+Time: 53.085 ms
+                                                                                          QUERY PLAN                                                                                          
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=25.08..25.09 rows=6 width=96) (actual time=0.515..0.517 rows=7.00 loops=1)
+   Sort Key: (lower(trips_by_rate.description))
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=14
+   ->  Subquery Scan on trips_by_rate  (cost=24.91..25.00 rows=6 width=96) (actual time=0.491..0.498 rows=7.00 loops=1)
+         Buffers: shared hit=11
+         ->  HashAggregate  (cost=24.91..24.98 rows=6 width=64) (actual time=0.471..0.474 rows=7.00 loops=1)
+               Group Key: COALESCE(r.description, 'unknown'::text)
+               Batches: 1  Memory Usage: 32kB
+               Buffers: shared hit=11
+               ->  Hash Left Join  (cost=8.04..23.21 rows=340 width=40) (actual time=0.056..0.313 rows=884.00 loops=1)
+                     Hash Cond: (_hyper_2_7_chunk.rate_code = r.rate_code)
+                     Buffers: shared hit=11
+                     ->  Bitmap Heap Scan on _hyper_2_7_chunk  (cost=6.91..21.16 rows=340 width=12) (actual time=0.040..0.146 rows=884.00 loops=1)
+                           Recheck Cond: (bucket < '2016-01-08 00:00:00'::timestamp without time zone)
+                           Heap Blocks: exact=7
+                           Buffers: shared hit=10
+                           ->  Bitmap Index Scan on _hyper_2_7_chunk__materialized_hypertable_2_bucket_idx  (cost=0.00..6.83 rows=340 width=0) (actual time=0.022..0.023 rows=884.00 loops=1)
+                                 Index Cond: (bucket < '2016-01-08 00:00:00'::timestamp without time zone)
+                                 Index Searches: 1
+                                 Buffers: shared hit=3
+                     ->  Hash  (cost=1.06..1.06 rows=6 width=16) (actual time=0.012..0.012 rows=6.00 loops=1)
+                           Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                           Buffers: shared hit=1
+                           ->  Seq Scan on rates r  (cost=0.00..1.06 rows=6 width=16) (actual time=0.007..0.008 rows=6.00 loops=1)
+                                 Buffers: shared hit=1
+ Planning:
+   Buffers: shared hit=85
+ Planning Time: 0.471 ms
+ Execution Time: 0.569 ms
+ Allocated Memory: allocated_by_plan=950kB allocated_by_exec=400kB base_allocation=4071kB
+(31 rows)
+
+Time: 53.640 ms
+      description      | num_trips 
+-----------------------+-----------
+ group ride            |        17
+ JFK                   |     54832
+ Nassau or Westchester |       967
+ negotiated fare       |      7193
+ Newark                |      4126
+ standard rate         |   2266401
+ unknown               |        42
+(7 rows)
+
+Time: 53.043 ms
