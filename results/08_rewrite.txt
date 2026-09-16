@@ -1,0 +1,63 @@
+Expanded display is off.
+                                                                                          QUERY PLAN                                                                                           
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=22100.87..22100.89 rows=6 width=72) (actual time=86.284..92.377 rows=7.00 loops=1)
+   Sort Key: (lower(COALESCE(r.description, 'unknown'::text)))
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=15251
+   ->  Hash Right Join  (cost=22099.69..22100.80 rows=6 width=72) (actual time=86.257..92.356 rows=7.00 loops=1)
+         Hash Cond: (r.rate_code = t.rate_code)
+         Buffers: shared hit=15248
+         ->  Seq Scan on rates r  (cost=0.00..1.06 rows=6 width=16) (actual time=0.023..0.024 rows=6.00 loops=1)
+               Buffers: shared hit=1
+         ->  Hash  (cost=22099.62..22099.62 rows=6 width=12) (actual time=86.191..92.282 rows=7.00 loops=1)
+               Buckets: 1024  Batches: 1  Memory Usage: 9kB
+               Buffers: shared hit=15247
+               ->  Subquery Scan on t  (cost=22099.50..22099.62 rows=6 width=12) (actual time=86.183..92.277 rows=7.00 loops=1)
+                     Buffers: shared hit=15247
+                     ->  Finalize HashAggregate  (cost=22099.50..22099.56 rows=6 width=12) (actual time=86.182..92.274 rows=7.00 loops=1)
+                           Group Key: rides.rate_code
+                           Batches: 1  Memory Usage: 32kB
+                           Buffers: shared hit=15247
+                           ->  Gather  (cost=8090.50..22099.39 rows=21 width=12) (actual time=21.449..92.247 rows=32.00 loops=1)
+                                 Workers Planned: 1
+                                 Workers Launched: 1
+                                 Buffers: shared hit=15247
+                                 ->  Parallel Append  (cost=7090.50..21097.29 rows=21 width=12) (actual time=17.284..82.329 rows=16.00 loops=2)
+                                       Buffers: shared hit=15247
+                                       ->  Custom Scan (VectorAgg)  (cost=7090.50..7090.55 rows=5 width=12) (actual time=13.766..13.769 rows=7.00 loops=1)
+                                             Buffers: shared hit=5056
+                                             ->  Custom Scan (ColumnarScan) on _hyper_1_3_chunk  (cost=10.42..4792.91 rows=459516 width=4) (actual time=0.000..0.001 rows=781178.00 loops=1)
+                                                   Vectorized Filter: (pickup_datetime < '2016-01-08 00:00:00'::timestamp without time zone)
+                                                   ->  Parallel Seq Scan on _hyper_1_3_chunk_compressed  (cost=0.00..197.75 rows=460 width=84) (actual time=0.014..0.393 rows=782.00 loops=1)
+                                                         Filter: (_ts_meta_v2_last_pickup_datetime < '2016-01-08 00:00:00'::timestamp without time zone)
+                                                         Buffers: shared hit=192
+                                       ->  Custom Scan (VectorAgg)  (cost=1106.71..1106.76 rows=5 width=12) (actual time=64.314..64.317 rows=7.00 loops=1)
+                                             Buffers: shared hit=814
+                                             ->  Custom Scan (ColumnarScan) on _hyper_1_5_chunk  (cost=10.40..748.78 rows=71587 width=4) (actual time=0.000..0.001 rows=122295.00 loops=1)
+                                                   Vectorized Filter: (pickup_datetime < '2016-01-08 00:00:00'::timestamp without time zone)
+                                                   ->  Parallel Seq Scan on _hyper_1_5_chunk_compressed  (cost=0.00..32.90 rows=72 width=84) (actual time=0.008..0.090 rows=123.00 loops=1)
+                                                         Filter: (_ts_meta_v2_last_pickup_datetime < '2016-01-08 00:00:00'::timestamp without time zone)
+                                                         Buffers: shared hit=32
+                                       ->  Custom Scan (VectorAgg)  (cost=2213.39..2213.45 rows=6 width=12) (actual time=32.877..32.878 rows=5.50 loops=2)
+                                             Buffers: shared hit=1660
+                                             ->  Custom Scan (ColumnarScan) on _hyper_1_6_chunk  (cost=10.40..1497.53 rows=143173 width=4) (actual time=0.000..0.000 rows=121299.50 loops=2)
+                                                   Vectorized Filter: (pickup_datetime < '2016-01-08 00:00:00'::timestamp without time zone)
+                                                   ->  Parallel Seq Scan on _hyper_1_6_chunk_compressed  (cost=0.00..65.79 rows=144 width=84) (actual time=0.012..0.096 rows=122.00 loops=2)
+                                                         Filter: (_ts_meta_v2_last_pickup_datetime < '2016-01-08 00:00:00'::timestamp without time zone)
+                                                         Buffers: shared hit=64
+                                       ->  Custom Scan (VectorAgg)  (cost=10686.38..10686.43 rows=5 width=12) (actual time=20.800..20.802 rows=7.00 loops=1)
+                                             Buffers: shared hit=7717
+                                             ->  Custom Scan (ColumnarScan) on _hyper_1_4_chunk  (cost=10.29..7192.83 rows=698709 width=4) (actual time=0.000..0.001 rows=1187506.00 loops=1)
+                                                   Vectorized Filter: (pickup_datetime < '2016-01-08 00:00:00'::timestamp without time zone)
+                                                   ->  Parallel Seq Scan on _hyper_1_4_chunk_compressed  (cost=0.00..205.74 rows=699 width=84) (actual time=0.014..0.559 rows=1188.00 loops=1)
+                                                         Filter: (_ts_meta_v2_last_pickup_datetime < '2016-01-08 00:00:00'::timestamp without time zone)
+                                                         Buffers: shared hit=197
+ Planning:
+   Buffers: shared hit=2282
+ Planning Time: 3.875 ms
+ Execution Time: 92.635 ms
+ Allocated Memory: allocated_by_plan=18801kB allocated_by_exec=40565kB base_allocation=4100kB
+(57 rows)
+
+Time: 152.006 ms
