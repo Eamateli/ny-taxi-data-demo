@@ -1,0 +1,27 @@
+Expanded display is off.
+    day     | busiest_hour | trips | avg_3h | vs_prev_hour 
+------------+--------------+-------+--------+--------------
+ 2016-01-01 | 01:00:00     | 28511 |  26891 |         3241
+ 2016-01-02 | 19:00:00     | 20769 |  20263 |          119
+ 2016-01-03 | 00:00:00     | 18290 |  18957 |        -1134
+ 2016-01-04 | 18:00:00     | 23229 |  20151 |         3005
+ 2016-01-05 | 18:00:00     | 23358 |  19827 |         3711
+ 2016-01-06 | 18:00:00     | 23640 |  19620 |         4228
+ 2016-01-07 | 19:00:00     | 24565 |  22660 |          458
+(7 rows)
+
+Time: 57.434 ms
+CREATE FUNCTION
+Time: 54.011 ms
+          check_name           | result 
+-------------------------------+--------
+ chunks                        | 4
+ chunks in columnstore         | 0
+ total size                    | 417 MB
+ job 1001 (policy_compression) | PAUSED
+(4 rows)
+
+Time: 64.383 ms
+psql:sql/07_analytics.sql:47: ERROR:  rates is not a hypertable
+CONTEXT:  PL/pgSQL function hypertable_health(regclass) line 9 at RAISE
+Time: 53.593 ms
