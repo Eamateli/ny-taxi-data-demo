@@ -1,2 +1,5 @@
 .env
 data/
+.venv/
+grafana/data/
+.env.compose

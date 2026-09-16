@@ -1,0 +1,123 @@
+Expanded display is off.
+psql:sql/09_grafana.sql:26: NOTICE:  extension "postgis" already exists, skipping
+CREATE EXTENSION
+Time: 60.070 ms
+ extname | extversion 
+---------+------------
+ postgis | 3.6.4
+(1 row)
+
+Time: 52.121 ms
+DO
+Time: 52.760 ms
+ALTER ROLE
+Time: 58.759 ms
+ALTER ROLE
+Time: 51.999 ms
+ALTER ROLE
+Time: 51.760 ms
+GRANT
+Time: 52.964 ms
+GRANT
+Time: 53.746 ms
+  rolname   | rolcanlogin | rolsuper | rolcreatedb | rolcreaterole | rolinherit | rolconnlimit 
+------------+-------------+----------+-------------+---------------+------------+--------------
+ grafana_ro | t           | f        | f           | f             | f          |           10
+(1 row)
+
+Time: 52.064 ms
+           role_setting           
+----------------------------------
+ default_transaction_read_only=on
+ statement_timeout=30s
+(2 rows)
+
+Time: 52.314 ms
+         table_name          | privileges 
+-----------------------------+------------
+ _direct_view_3              | SELECT
+ _hyper_1_3_chunk            | SELECT
+ _hyper_1_3_chunk_compressed | SELECT
+ _hyper_1_4_chunk            | SELECT
+ _hyper_1_4_chunk_compressed | SELECT
+ _hyper_1_5_chunk            | SELECT
+ _hyper_1_5_chunk_compressed | SELECT
+ _hyper_1_6_chunk            | SELECT
+ _hyper_1_6_chunk_compressed | SELECT
+ _hyper_3_8_chunk            | SELECT
+ _materialized_hypertable_3  | SELECT
+ _partial_view_3             | SELECT
+ payment_types               | SELECT
+ rates                       | SELECT
+ rides                       | SELECT
+ rides_hourly                | SELECT
+ trips_by_rate               | SELECT
+(17 rows)
+
+Time: 55.616 ms
+You are now connected to database "tsdb" as user "grafana_ro".
+ current_user | read_only | statement_timeout 
+--------------+-----------+-------------------
+ grafana_ro   | on        | 30s
+(1 row)
+
+Time: 53.589 ms
+-- map: long trips near Times Square (sampled, LIMIT 1000)
+ map_rows | min_distance | max_distance 
+----------+--------------+--------------
+     1000 |         5.02 |        47.11
+(1 row)
+
+Time: 378.091 ms
+-- trips per hour from the continuous aggregate
+ hourly_rows | trips  
+-------------+--------
+          25 | 356302
+(1 row)
+
+Time: 51.949 ms
+-- trips by rate code, week 1
+      description      | num_trips 
+-----------------------+-----------
+ group ride            |        17
+ JFK                   |     54832
+ Nassau or Westchester |       967
+ negotiated fare       |      7193
+ Newark                |      4126
+ standard rate         |   2266401
+ unknown               |        42
+(7 rows)
+
+Time: 52.321 ms
+-- hypertable health (optional panel; only if this works as grafana_ro)
+          check_name           | result 
+-------------------------------+--------
+ chunks                        | 4
+ chunks in columnstore         | 4
+ total size                    | 146 MB
+ job 1001 (policy_compression) | active
+(4 rows)
+
+Time: 62.941 ms
+-- expected: three errors
+psql:sql/09_grafana.sql:93: ERROR:  cannot execute CREATE TABLE in a read-only transaction
+Time: 50.912 ms
+psql:sql/09_grafana.sql:94: ERROR:  cannot execute INSERT in a read-only transaction
+Time: 52.511 ms
+psql:sql/09_grafana.sql:95: ERROR:  cannot execute DELETE in a read-only transaction
+Time: 50.860 ms
+-- expected: one more error even after SET transaction_read_only = off
+BEGIN
+Time: 51.353 ms
+SET
+Time: 51.446 ms
+psql:sql/09_grafana.sql:102: ERROR:  permission denied for table rates
+Time: 51.155 ms
+ROLLBACK
+Time: 50.820 ms
+ can_create_in_public | can_insert_rides | can_select_rides 
+----------------------+------------------+------------------
+ f                    | f                | t
+(1 row)
+
+Time: 51.939 ms
