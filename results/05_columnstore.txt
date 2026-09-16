@@ -1,1 +1,97 @@
-sql/05_columnstore.sql: No such file or directory
+Expanded display is off.
+CALL
+Time: 3517.098 ms (00:03.517)
+CALL
+Time: 5436.019 ms (00:05.436)
+CALL
+Time: 527.169 ms
+CALL
+Time: 1135.922 ms (00:01.136)
+Time: 57.771 ms
+ before | after  
+--------+--------
+ 417 MB | 147 MB
+(1 row)
+
+Time: 57.916 ms
+                                                                                       QUERY PLAN                                                                                        
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=31417.85..31417.86 rows=6 width=52) (actual time=2279.039..2282.620 rows=6.00 loops=1)
+   Sort Key: (lower(rates.description))
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=15299
+   ->  Finalize GroupAggregate  (cost=31416.50..31417.77 rows=6 width=52) (actual time=2279.024..2282.611 rows=6.00 loops=1)
+         Group Key: rates.description
+         Buffers: shared hit=15299
+         ->  Gather Merge  (cost=31416.50..31417.64 rows=10 width=20) (actual time=2278.995..2282.578 rows=12.00 loops=1)
+               Workers Planned: 1
+               Workers Launched: 1
+               Buffers: shared hit=15299
+               ->  Sort  (cost=30416.49..30416.51 rows=6 width=20) (actual time=2272.386..2272.391 rows=6.00 loops=2)
+                     Sort Key: rates.description
+                     Sort Method: quicksort  Memory: 25kB
+                     Buffers: shared hit=15299
+                     Worker 0:  Sort Method: quicksort  Memory: 25kB
+                     ->  Partial HashAggregate  (cost=30416.36..30416.42 rows=6 width=20) (actual time=2272.362..2272.368 rows=6.00 loops=2)
+                           Group Key: rates.description
+                           Batches: 1  Memory Usage: 32kB
+                           Buffers: shared hit=15291
+                           Worker 0:  Batches: 1  Memory Usage: 32kB
+                           ->  Hash Join  (cost=11.64..24315.04 rows=1220264 width=14) (actual time=0.143..1406.603 rows=1166768.00 loops=2)
+                                 Hash Cond: (rides.rate_code = rates.rate_code)
+                                 Buffers: shared hit=15291
+                                 ->  Parallel Append  (cost=10.50..18855.97 rows=1218516 width=6) (actual time=0.107..750.949 rows=1166789.00 loops=2)
+                                       Buffers: shared hit=15289
+                                       ->  Custom Scan (ColumnarScan) on _hyper_1_4_chunk  (cost=10.50..5796.71 rows=552000 width=6) (actual time=0.125..188.823 rows=593753.00 loops=2)
+                                             Vectorized Filter: (pickup_datetime < '2016-01-08 00:00:00'::timestamp without time zone)
+                                             Buffers: shared hit=7814
+                                             ->  Parallel Seq Scan on _hyper_1_4_chunk_compressed  (cost=0.00..276.71 rows=552 width=116) (actual time=0.012..0.419 rows=594.00 loops=2)
+                                                   Filter: (_ts_meta_v2_last_pickup_datetime < '2016-01-08 00:00:00'::timestamp without time zone)
+                                                   Buffers: shared hit=256
+                                       ->  Custom Scan (ColumnarScan) on _hyper_1_6_chunk  (cost=10.50..1449.18 rows=138000 width=6) (actual time=0.117..20.276 rows=242599.00 loops=1)
+                                             Vectorized Filter: (pickup_datetime < '2016-01-08 00:00:00'::timestamp without time zone)
+                                             Buffers: shared hit=1639
+                                             ->  Parallel Seq Scan on _hyper_1_6_chunk_compressed  (cost=0.00..69.18 rows=138 width=116) (actual time=0.006..0.153 rows=244.00 loops=1)
+                                                   Filter: (_ts_meta_v2_last_pickup_datetime < '2016-01-08 00:00:00'::timestamp without time zone)
+                                                   Buffers: shared hit=64
+                                       ->  Custom Scan (ColumnarScan) on _hyper_1_5_chunk  (cost=10.50..724.59 rows=69000 width=6) (actual time=0.122..10.125 rows=122295.00 loops=1)
+                                             Vectorized Filter: (pickup_datetime < '2016-01-08 00:00:00'::timestamp without time zone)
+                                             Buffers: shared hit=814
+                                             ->  Parallel Seq Scan on _hyper_1_5_chunk_compressed  (cost=0.00..34.59 rows=69 width=116) (actual time=0.006..0.079 rows=123.00 loops=1)
+                                                   Filter: (_ts_meta_v2_last_pickup_datetime < '2016-01-08 00:00:00'::timestamp without time zone)
+                                                   Buffers: shared hit=32
+                                       ->  Custom Scan (ColumnarScan) on _hyper_1_3_chunk  (cost=10.42..4792.91 rows=459516 width=6) (actual time=0.081..143.658 rows=781178.00 loops=1)
+                                             Vectorized Filter: (pickup_datetime < '2016-01-08 00:00:00'::timestamp without time zone)
+                                             Buffers: shared hit=5022
+                                             ->  Parallel Seq Scan on _hyper_1_3_chunk_compressed  (cost=0.00..197.75 rows=460 width=86) (actual time=0.004..0.418 rows=782.00 loops=1)
+                                                   Filter: (_ts_meta_v2_last_pickup_datetime < '2016-01-08 00:00:00'::timestamp without time zone)
+                                                   Buffers: shared hit=192
+                                 ->  Hash  (cost=1.06..1.06 rows=6 width=16) (actual time=0.026..0.026 rows=6.00 loops=2)
+                                       Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                       Buffers: shared hit=2
+                                       ->  Seq Scan on rates  (cost=0.00..1.06 rows=6 width=16) (actual time=0.020..0.021 rows=6.00 loops=2)
+                                             Buffers: shared hit=2
+ Planning:
+   Buffers: shared hit=1193 read=4
+   I/O Timings: shared read=0.062
+ Planning Time: 2.076 ms
+ Execution Time: 2282.722 ms
+ Allocated Memory: allocated_by_plan=10474kB allocated_by_exec=36265kB base_allocation=6810kB
+(61 rows)
+
+Time: 2473.265 ms (00:02.473)
+                                                                                                                   alter_job                                                                                                                   
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ (1001,"1 day",00:00:00,-1,01:00:00,t,"{""hypertable_id"": 1, ""compress_after"": ""7 days""}","2026-09-17 05:48:26.417609+00",_timescaledb_functions.policy_compression_check,f,"2026-09-17 05:48:26.417609+00",,"Columnstore Policy [1001]")
+(1 row)
+
+Time: 55.000 ms
+          check_name           | result 
+-------------------------------+--------
+ chunks                        | 4
+ chunks in columnstore         | 4
+ total size                    | 147 MB
+ job 1001 (policy_compression) | active
+(4 rows)
+
+Time: 62.717 ms

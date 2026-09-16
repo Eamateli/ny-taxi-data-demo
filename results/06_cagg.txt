@@ -1,43 +1,51 @@
 Expanded display is off.
-psql:sql/06_cagg.sql:6: ERROR:  continuous aggregate "rides_hourly" already exists
-HINT:  Drop or rename the existing continuous aggregate first or use another name.
-Time: 56.906 ms
-psql:sql/06_cagg.sql:8: NOTICE:  continuous aggregate "rides_hourly" is already up-to-date
+DROP VIEW
+Time: 55.878 ms
+psql:sql/06_cagg.sql:3: NOTICE:  drop cascades to table _timescaledb_internal._hyper_2_7_chunk
+DROP MATERIALIZED VIEW
+Time: 62.079 ms
+CREATE MATERIALIZED VIEW
+Time: 57.101 ms
 CALL
-Time: 782.908 ms
-psql:sql/06_cagg.sql:14: ERROR:  relation "trips_by_rate" already exists
-Time: 54.074 ms
-                                                                QUERY PLAN                                                                 
--------------------------------------------------------------------------------------------------------------------------------------------
- Sort  (cost=26.14..26.15 rows=6 width=96) (actual time=0.533..0.534 rows=7.00 loops=1)
+Time: 1508.418 ms (00:01.508)
+CREATE VIEW
+Time: 53.027 ms
+                                                                                          QUERY PLAN                                                                                          
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=25.08..25.09 rows=6 width=96) (actual time=0.561..0.562 rows=7.00 loops=1)
    Sort Key: (lower(trips_by_rate.description))
    Sort Method: quicksort  Memory: 25kB
-   Buffers: shared hit=11
-   ->  Subquery Scan on trips_by_rate  (cost=25.97..26.06 rows=6 width=96) (actual time=0.501..0.507 rows=7.00 loops=1)
-         Buffers: shared hit=8
-         ->  HashAggregate  (cost=25.97..26.05 rows=6 width=64) (actual time=0.476..0.478 rows=7.00 loops=1)
+   Buffers: shared hit=14
+   ->  Subquery Scan on trips_by_rate  (cost=24.91..25.00 rows=6 width=96) (actual time=0.531..0.537 rows=7.00 loops=1)
+         Buffers: shared hit=11
+         ->  HashAggregate  (cost=24.91..24.98 rows=6 width=64) (actual time=0.509..0.511 rows=7.00 loops=1)
                Group Key: COALESCE(r.description, 'unknown'::text)
                Batches: 1  Memory Usage: 32kB
-               Buffers: shared hit=8
-               ->  Hash Left Join  (cost=1.14..21.55 rows=884 width=40) (actual time=0.038..0.320 rows=884.00 loops=1)
-                     Hash Cond: (_hyper_2_7_chunk.rate_code = r.rate_code)
-                     Buffers: shared hit=8
-                     ->  Seq Scan on _hyper_2_7_chunk  (cost=0.00..18.05 rows=884 width=12) (actual time=0.019..0.164 rows=884.00 loops=1)
-                           Filter: (bucket < '2016-01-08 00:00:00'::timestamp without time zone)
-                           Buffers: shared hit=7
-                     ->  Hash  (cost=1.06..1.06 rows=6 width=16) (actual time=0.011..0.011 rows=6.00 loops=1)
+               Buffers: shared hit=11
+               ->  Hash Left Join  (cost=8.04..23.21 rows=340 width=40) (actual time=0.061..0.302 rows=884.00 loops=1)
+                     Hash Cond: (_hyper_3_8_chunk.rate_code = r.rate_code)
+                     Buffers: shared hit=11
+                     ->  Bitmap Heap Scan on _hyper_3_8_chunk  (cost=6.91..21.16 rows=340 width=12) (actual time=0.044..0.151 rows=884.00 loops=1)
+                           Recheck Cond: (bucket < '2016-01-08 00:00:00'::timestamp without time zone)
+                           Heap Blocks: exact=7
+                           Buffers: shared hit=10
+                           ->  Bitmap Index Scan on _hyper_3_8_chunk__materialized_hypertable_3_bucket_idx  (cost=0.00..6.83 rows=340 width=0) (actual time=0.024..0.025 rows=884.00 loops=1)
+                                 Index Cond: (bucket < '2016-01-08 00:00:00'::timestamp without time zone)
+                                 Index Searches: 1
+                                 Buffers: shared hit=3
+                     ->  Hash  (cost=1.06..1.06 rows=6 width=16) (actual time=0.012..0.013 rows=6.00 loops=1)
                            Buckets: 1024  Batches: 1  Memory Usage: 9kB
                            Buffers: shared hit=1
-                           ->  Seq Scan on rates r  (cost=0.00..1.06 rows=6 width=16) (actual time=0.006..0.007 rows=6.00 loops=1)
+                           ->  Seq Scan on rates r  (cost=0.00..1.06 rows=6 width=16) (actual time=0.008..0.008 rows=6.00 loops=1)
                                  Buffers: shared hit=1
  Planning:
-   Buffers: shared hit=208 dirtied=3
- Planning Time: 0.892 ms
- Execution Time: 0.591 ms
- Allocated Memory: allocated_by_plan=2645kB allocated_by_exec=339kB base_allocation=4094kB
-(26 rows)
+   Buffers: shared hit=75
+ Planning Time: 0.464 ms
+ Execution Time: 0.611 ms
+ Allocated Memory: allocated_by_plan=894kB allocated_by_exec=372kB base_allocation=7912kB
+(31 rows)
 
-Time: 54.835 ms
+Time: 53.881 ms
       description      | num_trips 
 -----------------------+-----------
  group ride            |        17
@@ -49,4 +57,4 @@ Time: 54.835 ms
  unknown               |        42
 (7 rows)
 
-Time: 53.101 ms
+Time: 52.925 ms

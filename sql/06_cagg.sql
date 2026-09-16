@@ -1,4 +1,7 @@
 \x off
+DROP VIEW IF EXISTS trips_by_rate;
+DROP MATERIALIZED VIEW IF EXISTS rides_hourly;
+
 CREATE MATERIALIZED VIEW rides_hourly WITH (timescaledb.continuous) AS
 SELECT time_bucket('1 hour', pickup_datetime) AS bucket, rate_code,
        count(*) AS trips, sum(total_amount) AS revenue
