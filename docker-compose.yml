@@ -1,0 +1,30 @@
+# Local Grafana for the NYC Taxi dashboard, fully provisioned from ./grafana.
+#   source .env && docker compose up -d      ->  http://localhost:3000  (admin / GRAFANA_ADMIN_PASSWORD)
+# Compose reads .env in this folder for ${...} substitution. Only what Grafana
+# needs is passed into the container; PGPASSWORD (tsdbadmin) is never passed.
+services:
+  grafana:
+    image: grafana/grafana:13.2.2
+    container_name: taxi-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
+      GF_NEWS_NEWS_FEED_ENABLED: "false"
+      # consumed by grafana/provisioning/datasources/tiger.yaml
+      PGHOST: ${PGHOST}
+      PGPORT: ${PGPORT}
+      GRAFANA_DB_PASSWORD: ${GRAFANA_DB_PASSWORD}
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+
+volumes:
+  grafana-data:

@@ -1,0 +1,370 @@
+{
+  "uid": "nyc-taxi",
+  "title": "NYC Taxi on Tiger Cloud",
+  "description": "Week 1 of January 2016 NYC yellow-taxi trips on a Tiger Cloud service (PostgreSQL 18, TimescaleDB 2.30). Timestamps are stored without time zone, so the dashboard runs in UTC to keep the time picker aligned with the data.",
+  "tags": [
+    "tiger-cloud",
+    "timescaledb",
+    "nyc-taxi"
+  ],
+  "timezone": "utc",
+  "editable": true,
+  "graphTooltip": 1,
+  "refresh": "",
+  "schemaVersion": 39,
+  "version": 1,
+  "time": {
+    "from": "2016-01-01T00:00:00.000Z",
+    "to": "2016-01-02T00:00:00.000Z"
+  },
+  "timepicker": {
+    "refresh_intervals": []
+  },
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": []
+  },
+  "links": [
+    {
+      "title": "Tiger Data: analyze transport data",
+      "type": "link",
+      "icon": "external link",
+      "url": "https://www.tigerdata.com/docs/build/examples/analyze-transport-data",
+      "targetBlank": true
+    }
+  ],
+  "panels": [
+    {
+      "id": 1,
+      "type": "geomap",
+      "title": "Long trips near Times Square",
+      "description": "Pickups of trips longer than 5 miles within 2 km of Times Square, up to 1,000 sampled at random from the selected time range. Markers plus a heatmap layer, as in Tiger Data's transport tutorial.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "tiger-cloud"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 18
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "tiger-cloud"
+          },
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "-- Long (> 5 mi) trips picked up within 2 km of Times Square, sampled across the\n-- selected range. Locations are computed at query time: no geometry columns,\n-- no full-table UPDATE. The lat/long box is a cheap superset of the circle.\nSELECT pickup_datetime          AS time,\n       trip_distance::float8    AS value,\n       pickup_latitude::float8  AS latitude,\n       pickup_longitude::float8 AS longitude\nFROM rides\nWHERE $__timeFilter(pickup_datetime)\n  AND trip_distance > 5\n  AND pickup_latitude  BETWEEN  40.740 AND  40.778\n  AND pickup_longitude BETWEEN -74.010 AND -73.960\n  AND ST_DWithin(\n        ST_SetSRID(ST_MakePoint(pickup_longitude, pickup_latitude), 4326)::geography,\n        ST_SetSRID(ST_MakePoint(-73.9851, 40.7589), 4326)::geography,\n        2000)\nORDER BY random()\nLIMIT 1000"
+        }
+      ],
+      "options": {
+        "view": {
+          "id": "coords",
+          "lat": 40.7589,
+          "lon": -73.9851,
+          "zoom": 12,
+          "allLayers": true
+        },
+        "controls": {
+          "showZoom": true,
+          "mouseWheelZoom": true,
+          "showAttribution": true,
+          "showScale": false,
+          "showMeasure": false,
+          "showDebug": false
+        },
+        "basemap": {
+          "type": "carto",
+          "name": "CARTO dark",
+          "config": {
+            "theme": "dark",
+            "showLabels": true
+          }
+        },
+        "layers": [
+          {
+            "type": "markers",
+            "name": "Pickups",
+            "location": {
+              "mode": "coords",
+              "latitude": "latitude",
+              "longitude": "longitude"
+            },
+            "tooltip": true,
+            "config": {
+              "style": {
+                "size": {
+                  "fixed": 4,
+                  "min": 2,
+                  "max": 10
+                },
+                "color": {
+                  "fixed": "orange"
+                },
+                "opacity": 0.7,
+                "symbol": {
+                  "mode": "fixed",
+                  "fixed": "img/icons/marker/circle.svg"
+                },
+                "symbolAlign": {
+                  "horizontal": "center",
+                  "vertical": "center"
+                },
+                "textConfig": {
+                  "fontSize": 12,
+                  "offsetX": 0,
+                  "offsetY": 0,
+                  "textAlign": "center",
+                  "textBaseline": "middle"
+                },
+                "rotation": {
+                  "fixed": 0,
+                  "mode": "mod",
+                  "min": -360,
+                  "max": 360
+                }
+              },
+              "showLegend": false
+            }
+          },
+          {
+            "type": "heatmap",
+            "name": "Heatmap",
+            "location": {
+              "mode": "coords",
+              "latitude": "latitude",
+              "longitude": "longitude"
+            },
+            "tooltip": false,
+            "config": {
+              "weight": {
+                "fixed": 1,
+                "min": 0,
+                "max": 1
+              },
+              "radius": 5,
+              "blur": 15
+            }
+          }
+        ],
+        "tooltip": {
+          "mode": "details"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "lengthmi",
+          "decimals": 2,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "orange"
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 2,
+      "type": "barchart",
+      "title": "Trips by rate code, week 1",
+      "description": "Whole-week totals from the trips_by_rate view (built on the rides_hourly continuous aggregate). This panel ignores the time picker. Log scale: standard-rate trips outnumber every other code 40:1 or more.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "tiger-cloud"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 0,
+        "w": 8,
+        "h": 9
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "tiger-cloud"
+          },
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT description, num_trips\nFROM trips_by_rate\nORDER BY num_trips DESC"
+        }
+      ],
+      "options": {
+        "orientation": "horizontal",
+        "xField": "description",
+        "showValue": "always",
+        "barWidth": 0.8,
+        "groupWidth": 0.7,
+        "stacking": "none",
+        "legend": {
+          "showLegend": false,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "orange"
+          },
+          "custom": {
+            "scaleDistribution": {
+              "type": "log",
+              "log": 10
+            },
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "lineWidth": 1
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "num_trips"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "trips"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "type": "table",
+      "title": "Hypertable health: rides",
+      "description": "hypertable_health('rides') from sql/07_analytics.sql, run as grafana_ro.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "tiger-cloud"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 9,
+        "w": 8,
+        "h": 9
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "tiger-cloud"
+          },
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT * FROM hypertable_health('rides')"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ],
+          "countRows": false,
+          "fields": ""
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            }
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Trips per hour",
+      "description": "sum(trips) per 1-hour bucket from the rides_hourly continuous aggregate.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "tiger-cloud"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 18,
+        "w": 24,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "tiger-cloud"
+          },
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT bucket AS time, sum(trips) AS trips\nFROM rides_hourly\nWHERE $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1"
+        }
+      ],
+      "options": {
+        "legend": {
+          "showLegend": false,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "orange"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 20,
+            "gradientMode": "opacity",
+            "showPoints": "auto",
+            "pointSize": 5,
+            "spanNulls": false,
+            "axisPlacement": "auto"
+          }
+        },
+        "overrides": []
+      }
+    }
+  ]
+}

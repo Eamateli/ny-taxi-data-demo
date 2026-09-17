@@ -1,0 +1,26 @@
+# Grafana data source, provisioned from the environment docker-compose passes in.
+# Only the read-only role is known to Grafana; tsdbadmin's password never
+# leaves .env. ${VAR} is expanded by Grafana at start-up.
+apiVersion: 1
+
+datasources:
+  - name: Tiger Cloud
+    uid: tiger-cloud
+    type: postgres
+    access: proxy
+    url: ${PGHOST}:${PGPORT}
+    user: grafana_ro
+    isDefault: true
+    editable: false
+    jsonData:
+      database: tsdb
+      sslmode: require
+      timescaledb: true
+      postgresVersion: 1500
+      # small pool: the service has 0.5 CPU and grafana_ro has CONNECTION LIMIT 10
+      maxOpenConns: 4
+      maxIdleConns: 2
+      maxIdleConnsAuto: false
+      connMaxLifetime: 14400
+    secureJsonData:
+      password: ${GRAFANA_DB_PASSWORD}

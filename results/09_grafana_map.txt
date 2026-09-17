@@ -1,0 +1,83 @@
+Expanded display is off.
+ current_user 
+--------------
+ grafana_ro
+(1 row)
+
+Time: 53.512 ms
+                                                                                                                                                 QUERY PLAN                                                                                                                                                 
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=31173.94..31176.44 rows=1000 width=40) (actual time=266.123..266.292 rows=1000.00 loops=1)
+   Buffers: shared hit=5556
+   ->  Sort  (cost=31173.94..32033.33 rows=343756 width=40) (actual time=266.122..266.219 rows=1000.00 loops=1)
+         Sort Key: (random())
+         Sort Method: top-N heapsort  Memory: 169kB
+         Buffers: shared hit=5556
+         ->  Result  (cost=11.14..12326.17 rows=343756 width=40) (actual time=9.577..262.531 rows=16625.00 loops=1)
+               Buffers: shared hit=5553
+               ->  Append  (cost=11.14..5451.05 rows=343756 width=38) (actual time=9.558..251.066 rows=16625.00 loops=1)
+                     Buffers: shared hit=5553
+                     ->  Custom Scan (ColumnarScan) on _hyper_1_3_chunk  (cost=11.14..1728.23 rows=158833 width=38) (actual time=9.558..116.957 rows=8139.00 loops=1)
+                           Filter: ((trip_distance > '5'::numeric) AND st_dwithin((st_setsrid(st_makepoint((pickup_longitude)::double precision, (pickup_latitude)::double precision), 4326))::geography, '0101000020E610000089D2DEE00B7F52C09A779CA223614440'::geography, '2000'::double precision, true))
+                           Rows Removed by Filter: 153039
+                           Vectorized Filter: ((pickup_datetime >= '2016-01-01 00:00:00'::timestamp without time zone) AND (pickup_datetime <= '2016-01-02 00:00:00'::timestamp without time zone))
+                           Buffers: shared hit=2678
+                           ->  Index Scan using _hyper_1_3_chunk_compressed_vendor_id__ts_meta_v2_first_pic_idx on _hyper_1_3_chunk_compressed  (cost=0.28..139.90 rows=159 width=148) (actual time=0.097..0.265 rows=162.00 loops=1)
+                                 Index Cond: ((_ts_meta_v2_first_pickup_datetime >= '2016-01-01 00:00:00'::timestamp without time zone) AND (_ts_meta_v2_last_pickup_datetime <= '2016-01-02 00:00:00'::timestamp without time zone))
+                                 Index Searches: 1
+                                 Buffers: shared hit=48
+                     ->  Custom Scan (ColumnarScan) on _hyper_1_4_chunk  (cost=11.11..2004.04 rows=184923 width=38) (actual time=0.293..132.718 rows=8486.00 loops=1)
+                           Filter: ((trip_distance > '5'::numeric) AND st_dwithin((st_setsrid(st_makepoint((pickup_longitude)::double precision, (pickup_latitude)::double precision), 4326))::geography, '0101000020E610000089D2DEE00B7F52C09A779CA223614440'::geography, '2000'::double precision, true))
+                           Rows Removed by Filter: 178020
+                           Vectorized Filter: ((pickup_datetime >= '2016-01-01 00:00:00'::timestamp without time zone) AND (pickup_datetime <= '2016-01-02 00:00:00'::timestamp without time zone))
+                           Buffers: shared hit=2875
+                           ->  Index Scan using _hyper_1_4_chunk_compressed_vendor_id__ts_meta_v2_first_pic_idx on _hyper_1_4_chunk_compressed  (cost=0.28..154.81 rows=185 width=148) (actual time=0.113..0.306 rows=187.00 loops=1)
+                                 Index Cond: ((_ts_meta_v2_first_pickup_datetime >= '2016-01-01 00:00:00'::timestamp without time zone) AND (_ts_meta_v2_last_pickup_datetime <= '2016-01-02 00:00:00'::timestamp without time zone))
+                                 Index Searches: 1
+                                 Buffers: shared hit=41
+ Planning:
+   Buffers: shared hit=1802
+ Planning Time: 7.329 ms
+ Execution Time: 266.551 ms
+ Allocated Memory: allocated_by_plan=14172kB allocated_by_exec=33524kB base_allocation=4097kB base_allocation_increase=4096kB
+(33 rows)
+
+Time: 332.756 ms
+                                                                                                                                                                                                                              QUERY PLAN                                                                                                                                                                                                                              
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=31173.94..31176.44 rows=1000 width=40) (actual time=134.942..135.103 rows=1000.00 loops=1)
+   Buffers: shared hit=5194
+   ->  Sort  (cost=31173.94..32033.33 rows=343756 width=40) (actual time=134.941..135.030 rows=1000.00 loops=1)
+         Sort Key: (random())
+         Sort Method: top-N heapsort  Memory: 168kB
+         Buffers: shared hit=5194
+         ->  Result  (cost=11.14..12326.17 rows=343756 width=40) (actual time=0.162..131.560 rows=16625.00 loops=1)
+               Buffers: shared hit=5194
+               ->  Append  (cost=11.14..5451.05 rows=343756 width=38) (actual time=0.160..120.368 rows=16625.00 loops=1)
+                     Buffers: shared hit=5194
+                     ->  Custom Scan (ColumnarScan) on _hyper_1_3_chunk  (cost=11.14..1728.23 rows=158833 width=38) (actual time=0.159..32.340 rows=8139.00 loops=1)
+                           Filter: ((trip_distance > '5'::numeric) AND (pickup_latitude >= 40.740) AND (pickup_latitude <= 40.778) AND (pickup_longitude >= '-74.010'::numeric) AND (pickup_longitude <= '-73.960'::numeric) AND st_dwithin((st_setsrid(st_makepoint((pickup_longitude)::double precision, (pickup_latitude)::double precision), 4326))::geography, '0101000020E610000089D2DEE00B7F52C09A779CA223614440'::geography, '2000'::double precision, true))
+                           Rows Removed by Filter: 153039
+                           Vectorized Filter: ((pickup_datetime >= '2016-01-01 00:00:00'::timestamp without time zone) AND (pickup_datetime <= '2016-01-02 00:00:00'::timestamp without time zone))
+                           Buffers: shared hit=2342
+                           ->  Index Scan using _hyper_1_3_chunk_compressed_vendor_id__ts_meta_v2_first_pic_idx on _hyper_1_3_chunk_compressed  (cost=0.28..139.90 rows=159 width=148) (actual time=0.060..0.166 rows=162.00 loops=1)
+                                 Index Cond: ((_ts_meta_v2_first_pickup_datetime >= '2016-01-01 00:00:00'::timestamp without time zone) AND (_ts_meta_v2_last_pickup_datetime <= '2016-01-02 00:00:00'::timestamp without time zone))
+                                 Index Searches: 1
+                                 Buffers: shared hit=37
+                     ->  Custom Scan (ColumnarScan) on _hyper_1_4_chunk  (cost=11.11..2004.04 rows=184923 width=38) (actual time=0.164..37.352 rows=8486.00 loops=1)
+                           Filter: ((trip_distance > '5'::numeric) AND (pickup_latitude >= 40.740) AND (pickup_latitude <= 40.778) AND (pickup_longitude >= '-74.010'::numeric) AND (pickup_longitude <= '-73.960'::numeric) AND st_dwithin((st_setsrid(st_makepoint((pickup_longitude)::double precision, (pickup_latitude)::double precision), 4326))::geography, '0101000020E610000089D2DEE00B7F52C09A779CA223614440'::geography, '2000'::double precision, true))
+                           Rows Removed by Filter: 178020
+                           Vectorized Filter: ((pickup_datetime >= '2016-01-01 00:00:00'::timestamp without time zone) AND (pickup_datetime <= '2016-01-02 00:00:00'::timestamp without time zone))
+                           Buffers: shared hit=2852
+                           ->  Index Scan using _hyper_1_4_chunk_compressed_vendor_id__ts_meta_v2_first_pic_idx on _hyper_1_4_chunk_compressed  (cost=0.28..154.81 rows=185 width=148) (actual time=0.071..0.200 rows=187.00 loops=1)
+                                 Index Cond: ((_ts_meta_v2_first_pickup_datetime >= '2016-01-01 00:00:00'::timestamp without time zone) AND (_ts_meta_v2_last_pickup_datetime <= '2016-01-02 00:00:00'::timestamp without time zone))
+                                 Index Searches: 1
+                                 Buffers: shared hit=41
+ Planning:
+   Buffers: shared hit=65
+ Planning Time: 0.718 ms
+ Execution Time: 135.234 ms
+ Allocated Memory: allocated_by_plan=1027kB allocated_by_exec=27246kB base_allocation=8193kB
+(33 rows)
+
+Time: 190.464 ms

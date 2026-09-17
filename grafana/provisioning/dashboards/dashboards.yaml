@@ -1,0 +1,14 @@
+# Loads every JSON file in grafana/dashboards (mounted at /var/lib/grafana/dashboards).
+# allowUiUpdates lets you save changes in the UI; they land in Grafana's own
+# database, not in the file, so export them back with the API afterwards.
+apiVersion: 1
+
+providers:
+  - name: taxi-support-demo
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false
